@@ -63,9 +63,21 @@ insert into borrow (reader_id, book_id) values
 ('2','102'),
 ('3','103');
 
+-- 2. Cập nhật dữ liệu
+update borrow set return_date = '2026-10-01' where reader_id = 1;
+update book set publish_year = 2021 where publish_year >= 2021;
 
-update borrow set return_date = '2024-10-01' where reader_id = 1;
-update book set publish_year = '2021' where publish_year >= 2021;
+-- 3. Xóa dữ liệu: Xóa các lượt mượn sách có borrow_date < '2024-09-18'
+
+delete from borrow where borrow_date < '2024-09-18'; -- không có, vì ngày mượn được thêm dùng theo ngày hiện tại
+
+
+-- 4.Truy vấn dữ liệu: Viết các câu SELECT lấy ra dữ liệu ở 3 bảng.
+select * from reader;
+select * from book;
+select * from borrow;
+
+
 
 
 
