@@ -187,14 +187,9 @@ group by c.customer_id, c.full_name;
 
 -- Bai 6:
 -- Hiển thị: Tên sản phẩm -- Tổng số lượng bán, Tổng doanh thu, Giá bán trung bình
-select
-  p.product_name as 'Tên sản phẩm',
-  sum(oi.quantity) as 'Tổng số lượng bán',
-  sum(oi.quantity * p.price) as 'Tổng doanh thu',
-  avg(p.price) as 'Giá bán trung bình'
+select p.product_name as 'Tên sản phẩm', sum(ord_it.quantity) as 'Tổng số lượng bán',sum(ord_it.quantity * p.price) as 'Tổng doanh thu', avg(p.price) as 'Giá bán trung bình'
 from products p
-join order_items oi
-  on p.product_id = oi.product_id
+join order_items ord_it on p.product_id = ord_it.product_id
 group by p.product_id, p.product_name
 having sum(oi.quantity) >= 10
 order by sum(oi.quantity * p.price) desc
