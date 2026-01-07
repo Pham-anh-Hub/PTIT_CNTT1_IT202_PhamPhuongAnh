@@ -104,8 +104,25 @@ select distinct r.room_type, sum(abs(datediff(b.check_in, b.check_out) * r.price
 join bookings b on b.room_id = r.room_id group by r.room_type;
 
 -- Tìm những khách đã đặt phòng từ 2 lần trở lên
+select g.guest_id, g.guest_name, count(booking_id) as booking_time from bookings b
+join guests g on b.guest_id = g.guest_id group by g.guest_id, g.guest_name;
 
 -- Tìm loại phòng có số lượt đặt phòng nhiều nhất
+select r.room_type, count(booking_id) from bookings b
+join rooms r on b.room_id = r.room_id group by room_type order by count(booking_id) desc limit 1;
+
+
+-- PHẦN III – TRUY VẤN LỒNG
+-- Hiển thị những phòng có giá thuê cao hơn giá trung bình của tất cả các phòng
+select * from rooms where price_per_day > (select avg(price_per_day) from rooms);
+
+-- Hiển thị những khách chưa từng đặt phòng
+select * from guests g where g.guest_id not in (select guest_id from bookings);
+
+
+-- Tìm phòng được đặt nhiều lần nhất
+select * from rooms where room_id = (select room_id from bookings group by room_id order by count(booking_id) desc limit 1);
+
 
 
 
