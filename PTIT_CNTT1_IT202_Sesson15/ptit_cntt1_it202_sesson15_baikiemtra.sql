@@ -140,6 +140,58 @@ delimiter ;
 -- Yêu cầu: Viết trigger BEFORE UPDATE trên bảng Grades. Nếu OldScore (OLD.Score) >= 4.0, 
 -- hãy hủy thao tác cập nhật bằng cách phát sinh lỗi (Sử dụng SIGNAL SQLSTATE với thông báo lỗi tùy ý).
 
+delimiter //
+create trigger trigger_before_update_grades
+before update on grades 
+for each row
+begin 
+	if(old.score >= 4) then 
+		signal sqlstate '45000'
+        set message_text = 'SV đã qua môn, không được sửa điểm';
+	else 
+		insert into gradelog(student_id, OldScore, NewScore) values (old.student_id, old.score, new.score);
+	end if;
+end //
+delimiter ;
+
+update grades set score = 5 where student_id = 'SV03' and subject_id = 'SB02';
+update grades set score = 5 where student_id = 'SV01' and subject_id = 'SB01';
+
+select * from gradelog;
+
+
+-- Câu 6 (Stored Procedure & Transaction - 1.5đ): Viết một Stored Procedure tên sp_DeleteStudentGrade nhận vào p_StudentID và p_SubjectID. 
+-- Thủ tục này thực hiện việc sinh viên xin hủy môn học nhưng phải đảm bảo an toàn dữ liệu:
+-- Bắt đầu Transaction.
+-- Lưu điểm hiện tại của sinh viên vào bảng GradeLog (Ghi chú: coi như điểm mới NewScore là NULL) để lưu vết trước khi xóa.
+-- Thực hiện lệnh xóa (DELETE) dòng dữ liệu tương ứng trong bảng Grades.
+-- Kiểm tra: Nếu không tìm thấy dòng dữ liệu nào được xóa (dùng hàm ROW_COUNT() trả về 0), hãy ROLLBACK.
+-- Nếu xóa thành công, hãy COMMIT.
+
+
+delimiter //
+create procedure sp_DeleteStudentGrade (
+	p_StudentID int,
+    p_SubjectID int
+)
+begin 
+	declare curr_OldScore decimal(5,2);
+    start transaction;
+    -- Lấy điểm hiện tại
+    select score into curr_OldScore from grades where student_id = p_StudentID and subject_id = p_SubjectID;
+    insert into gradelog(student_id, OldScore, NewScore) values (p_StudentID, curr_OldScore, null);
+    delete from grades where student_id = p_StudentID and subject_id = p_SubjectID;
+    
+    if (row_count() = 0) then rollback;
+    else commit;
+    end if;
+end //
+delimiter ;
+
+
+
+
+
 
 
 
